@@ -2,6 +2,7 @@
 
 import socket
 import select
+import routing
 
 METHODS = ["GET", "POST"]
 
@@ -15,10 +16,12 @@ def fill_web_response(answer):
     return '\r\n'.join(response)
 
 def web_msg(sock, method, file_requested):
-    if method == 'GET' and file_requested == '/':
-        answer = open("html/index.php").read()
+    if method == 'GET':
+        answer = routing.get(file_requested)
+    elif method == 'POST':
+        answer = routing.post(file_requested)
     else:
-        answer = "<html><h1>Site under construction</h1></html>"
+        answer = "<html><h1>No such method</h1></html>"
     sock.send(fill_web_response(answer))
 
 def analyze_msg(msg):
