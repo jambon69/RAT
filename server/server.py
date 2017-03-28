@@ -24,11 +24,17 @@ def web_msg(sock, method, file_requested):
         answer = "<html><h1>No such method</h1></html>"
     sock.send(fill_web_response(answer))
 
+def simple_msg(msg):
+    if msg[0] == "0":
+        msg = msg[1::]
+        f = open("screenshots/screen.jpg", "w")
+        f.write(msg)
+
 def analyze_msg(msg):
     split_msg = msg.split('\n')
     firstline = split_msg[0].split()
     if firstline[0] in METHODS and firstline[2].find("HTTP") != -1:
-        print split_msg[1].split()[1] + ": " + firstline[0] + " " + firstline[1]
+        print "[$] " + split_msg[1].split()[1] + " : " + firstline[0] + " " + firstline[1]
         return 1, firstline[0], firstline[1]
     return 0, 0, 0
 
@@ -36,13 +42,14 @@ def init():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.bind(('', 1337))
     sock.listen(5)
+    print "[^] You can now connect to : http://<server ip>:1337 to access the admin panel !"
     return sock
 
 def accept(sock_list, sock):
     sock_client, infos_client = sock.accept()
-    print "new client : " + str(infos_client)
+    # print "[^] New client : " + str(infos_client)
     sock_list.append(sock_client)
-    
+
 def main():
     sock_list = []
     sock = init()
@@ -53,7 +60,7 @@ def main():
             if elem == sock:
                 accept(sock_list, sock)
             else:
-                msg = elem.recv(2048)
+                msg = elem.recv(5000)
                 if len(msg) == 0:
                     elem.close()
                     sock_list.remove(elem)
@@ -62,8 +69,7 @@ def main():
                     if msg_type == 1:
                         web_msg(elem, method, request)
                     else:
-                        print "> " + msg
-
+                        simple_msg(msg)
 
 
 if __name__ == '__main__':
