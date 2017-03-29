@@ -5,6 +5,13 @@
     include('header.html')
     ?>
     <body>
-	<h1>Under construction</h1>
+      <h1>Under construction</h1>
+      <form action="/screenshot" method="POST">
+	<input type="submit" value="Screenshot"/>
+      </form>
+      <?lolpy
+for elem in param['list']:
+   print elem
+      ?>
     </body>
 </html>

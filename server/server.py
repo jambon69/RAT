@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from pwn import *
 import socket
 import select
 import routing
@@ -15,11 +16,16 @@ def fill_web_response(answer):
     response.append(answer)
     return '\r\n'.join(response)
 
-def web_msg(sock, method, file_requested):
+def web_msg(sock, method, file_requested, sock_list, server_sock):
+    list_sock = []
+    for socket in sock_list:
+        if socket != sock and socket != server_sock:
+            list_sock.append(socket)
+    param = {'sock_list':list_sock, 'list':['ca', 'marche']}
     if method == 'GET':
-        answer = routing.get(file_requested)
+        answer = routing.get(file_requested, sock, param)
     elif method == 'POST':
-        answer = routing.post(file_requested)
+        answer = routing.post(file_requested, sock, param)
     else:
         answer = "<html><h1>No such method</h1></html>"
     sock.send(fill_web_response(answer))
@@ -34,7 +40,7 @@ def analyze_msg(msg):
     split_msg = msg.split('\n')
     firstline = split_msg[0].split()
     if firstline[0] in METHODS and firstline[2].find("HTTP") != -1:
-        print "[$] " + split_msg[1].split()[1] + " : " + firstline[0] + " " + firstline[1]
+        log.info(split_msg[1].split()[1] + " : " + firstline[0] + " " + firstline[1])
         return 1, firstline[0], firstline[1]
     return 0, 0, 0
 
@@ -42,7 +48,7 @@ def init():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.bind(('', 1337))
     sock.listen(5)
-    print "[^] You can now connect to : http://<server ip>:1337 to access the admin panel !"
+    log.info("You can now connect to : http://<server ip>:1337 to access the admin panel !")
     return sock
 
 def accept(sock_list, sock):
@@ -67,7 +73,7 @@ def main():
                 else:
                     msg_type, method, request = analyze_msg(msg)
                     if msg_type == 1:
-                        web_msg(elem, method, request)
+                        web_msg(elem, method, request, sock_list, sock)
                     else:
                         simple_msg(msg)
 

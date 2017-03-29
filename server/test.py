@@ -2,11 +2,16 @@
 
 import pyscreenshot as ImageGrab
 from PIL import Image
+from cStringIO import StringIO
+import sys
 
 if __name__ == "__main__":
-    im = ImageGrab.grab()
-    im.save("lol.jpg")
+    old_stdout = sys.stdout
+    sys.stdout = mystdout = StringIO()
 
-    foo = Image.open("lol.jpg")
-    foo = foo.resize((300,100),Image.ANTIALIAS)
-    foo.save("lol.jpg",quality=70)
+    print "lol"
+    print "lul"
+    
+    sys.stdout = old_stdout
+
+    print "----- \n" + mystdout.getvalue()

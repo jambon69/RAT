@@ -2,13 +2,17 @@
 
 import lolparser
 
-def get(param):
+def get(param, sock, parameters):
     if param == "/":
-        return lolparser.parse_it("html/index.html")
+        return lolparser.parse_it("html/index.html", parameters)
     elif param == "/index":
-        return lolparser.parse_it("html/index.html")
+        return lolparser.parse_it("html/index.html", parameters)
     else:
-        return lolparser.parse_it("html/404.html")
+        return lolparser.parse_it("html/404.html", parameters)
 
-def post(param):
-    pass
+def post(param, sock, parameters):
+    if param == "/screenshot":
+        for socket in parameters['sock_list']:
+            if socket != sock:
+                socket.send("screenshot")
+        return lolparser.parse_it("html/index.html", parameters)
